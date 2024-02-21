@@ -32,8 +32,9 @@ def get_all_books_urls(url:str)->List[str]:
     
         logger.info(f"Scraping de la page {url}")
         try:
-            response = requests.get(url)
-            response.raise_for_status()
+            with requests.Session() as session:
+                response = session.get(url)
+                response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.error(f"Erreur lors de la resquete HTTP sur la page {url} : {e}")
             continue
@@ -84,7 +85,7 @@ def get_all_books_urls_on_page(url:str,tree:HTMLParser)->List[str]:
         return [urljoin(url,link.attributes["href"]) for link in books_links_nodes if "href" in link.attributes]
 
 
-def get_book_total_price(url:str)->float:
+def get_book_total_price(url:str, session:requests.Session=None)->float:
     """Recuperer le prix total d'un livre depuis sont url
 
     Args:
@@ -97,7 +98,11 @@ def get_book_total_price(url:str)->float:
     logger.info(f"Recueration du prix de la page : {url}")
     
     try:
-        response = requests.get(url)
+        if session:
+            response = session.get(url)
+        else:
+            response = requests.get(url)
+            
         response.raise_for_status()
 
         tree = HTMLParser(response.text)
@@ -164,9 +169,11 @@ def main():
     all_books_urls=get_all_books_urls(URL)
     total_price=[]
 
-    for book_url in all_books_urls:
-        price = get_book_total_price(book_url)
-        total_price.append(price)
+    with requests.Session() as session:
+
+        for book_url in all_books_urls:
+            price = get_book_total_price(book_url, session=session)
+            total_price.append(price)
 
     return sum(total_price)
 
