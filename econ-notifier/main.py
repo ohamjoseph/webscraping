@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import sentry_sdk
 
 sentry_sdk.init(
-    dsn="https://8cad5ee4f4ebe4ceacbec1bb397bfd78@o4506854154043392.ingest.sentry.io/4506854159613952",
+    dsn=os.environ["SENTRY_TOKEN"],
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
     traces_sample_rate=1.0,
